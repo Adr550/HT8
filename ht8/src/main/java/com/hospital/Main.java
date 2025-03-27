@@ -2,6 +2,8 @@ package com.hospital;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        SistemaEmergencia sistema = new SistemaEmergencia();
+        sistema.cargarPacientes("pacientes.txt");
+        sistema.mostrarMenuPrincipal();
     }
 }
