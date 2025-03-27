@@ -2,7 +2,6 @@ import simpy
 import random
 import statistics
 
-env = simpy.Environment()
 
 NUM_ENFERMERAS = 1
 NUM_DOCTORES= 2
