@@ -11,7 +11,18 @@ public class Main {
             colaPacientes.add(p);
         }
 
+        // 2. Obtener pacientes ordenados
+         List<Paciente> pacientesOrdenados = colaPacientes.getOrdenados();
+
+                // 3. Imprimir en consola
+                System.out.println("Lista de Pacientes Ordenados por Prioridad:");
+                for (Paciente p : pacientesOrdenados) {
+                    System.out.println(p);
+                }
+
         colaPacientes.guardarEnCSV("ht8/src/main/resources/pacientes_ordenados.csv");
     }
+
+    
 }
 

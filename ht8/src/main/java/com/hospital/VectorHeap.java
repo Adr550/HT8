@@ -3,6 +3,8 @@ package com.hospital;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class VectorHeap<E extends Comparable<E>> implements PriorityQueue<E> {
     private ArrayList<E> data;
@@ -98,5 +100,13 @@ public class VectorHeap<E extends Comparable<E>> implements PriorityQueue<E> {
             System.err.println("Error al guardar el archivo: " + e.getMessage());
         }
     }
+
+    //Mostrar los pacientes 
+    public List<E> getOrdenados() {
+        List<E> listaOrdenada = new ArrayList<>(data);
+        Collections.sort(listaOrdenada);
+        return listaOrdenada;
+    }
+    
 }
 
