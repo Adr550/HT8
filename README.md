@@ -24,9 +24,7 @@ Para ejecutar las pruebas unitarias:
 1. Dirígete a la carpeta raíz del proyecto HT8/ht8.
 
 2. Ejecuta el siguiente comando:
-
-  '''bash
-  mvn test
+`mvn test`
 
 # Autores 
 - Adrian Estrada
