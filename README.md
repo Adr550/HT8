@@ -12,9 +12,11 @@ Para ejecutar el programa, sigue estos pasos:
 2. Compila el archivo `Main.java` utilizando el siguiente comando:
    ```bash
    javac Main.java
+   
 3. Ejecuta el programa con el siguiente comando:
-  '''bash
-  java Main
+  `java Main`
+   
+
 ## Ejecución de Pruebas Unitarias
 
 Para ejecutar las pruebas unitarias:
