@@ -17,7 +17,7 @@ public class Main {
                 // 3. Imprimir en consola
                 System.out.println("Lista de Pacientes Ordenados por Prioridad:");
                 for (Paciente p : pacientesOrdenados) {
-                    System.out.println(p);
+                    System.out.println(p.toString());
                 }
 
         colaPacientes.guardarEnCSV("ht8/src/main/resources/pacientes_ordenados.csv");
