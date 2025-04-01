@@ -1,4 +1,4 @@
-import simpy
+import SimulaciónHospital
 import random
 import statistics
 
@@ -14,8 +14,9 @@ class Hospital:
     def __init__(self,env,NUM_ENFERMERAS,NUM_DOCTORES):
         self.env = env
         self.NUM_ENFERMERAS = simpy.Resource(env, NUM_ENFERMERAS)
+
+    def enfermeras(self):
+        
         self.Tiempo_Prom_Ev = Tiempo_Prom_Ev
-
-
 
 
