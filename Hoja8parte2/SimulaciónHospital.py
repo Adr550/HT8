@@ -1,15 +1,22 @@
-import SimulaciónHospital
 import random
 import statistics
 import simpy
+import matplotlib.pyplot as plt
 
-NUM_ENFERMERAS = 6
-NUM_DOCTORES = 6
-NUM_MAQUINAS = 4
+# Configuración inicial
+TIEMPO_SIMULACION = 480  # 8 horas = 480 minutos
 Tiempo_Prom_Ev = 10
 Tiempo_Prom_Doc = 11
 Tiempo_Prom_Enf = 50
-TIEMPO_SIMULACION = 480
+NUM_ENFERMERAS = 6
+NUM_DOCTORES = 6
+NUM_MAQUINAS = 4
+
+# Costos de recursos
+COSTO_ENFERMERA_POR_HORA = 15  # $ por hora
+COSTO_DOCTOR_POR_HORA = 60  # $ por hora
+COSTO_MAQUINA_POR_DIA = 500  # $ por día
+
 # Variables para estadísticas
 Pacientes_Tratados = 0
 tiempos_espera_triage = []
@@ -48,7 +55,7 @@ def paciente(env, id, hospital):
         print(
             f"Paciente {id} comienza triage con enfermera en tiempo {env.now:.1f} (esperó {tiempo_espera_triage:.1f})")
 
-        # Tiempo de enfermear triage
+        # Tiempo de enfermera triage
         tiempo_triage = random.expovariate(1.0 / hospital.tiempo_prom_enfermera)
         yield env.timeout(tiempo_triage)
 
@@ -57,7 +64,7 @@ def paciente(env, id, hospital):
         severidades_pacientes[severidad] += 1
         print(f"Paciente {id} termina triage en tiempo {env.now:.1f}. Severidad asignada: {severidad}")
 
-    # Atencion con el doctor
+    # Atención con el doctor
     tiempo_solicitud_doctor = env.now
     with hospital.doctores.request(priority=severidad) as solicitud:
         yield solicitud
@@ -115,9 +122,25 @@ def generador_pacientes(env, hospital, tiempo_entre_llegadas):
         env.process(paciente(env, id_paciente, hospital))
 
 
+def calcular_costos(num_enfermeras, num_doctores, num_maquinas, horas_por_dia=8):
+
+    costo_enfermeras = num_enfermeras * COSTO_ENFERMERA_POR_HORA * horas_por_dia
+    costo_doctores = num_doctores * COSTO_DOCTOR_POR_HORA * horas_por_dia
+    costo_maquinas = num_maquinas * COSTO_MAQUINA_POR_DIA
+
+    costo_total = costo_enfermeras + costo_doctores + costo_maquinas
+
+    return {
+        'enfermeras': costo_enfermeras,
+        'doctores': costo_doctores,
+        'maquinas': costo_maquinas,
+        'total': costo_total
+    }
+
+
 def imprimir_estadisticas():
-    """Imprime estadísticas de la simulación"""
     print("\n---------- ESTADÍSTICAS DE LA SIMULACIÓN ----------")
+    print(f"Configuración: {NUM_ENFERMERAS} enfermeras, {NUM_DOCTORES} doctores, {NUM_MAQUINAS} máquinas")
     print(f"Total de pacientes tratados: {Pacientes_Tratados}")
 
     if tiempos_espera_triage:
@@ -144,17 +167,64 @@ def imprimir_estadisticas():
         if cantidad > 0:
             print(f"Severidad {severidad}: {cantidad} pacientes ({cantidad / Pacientes_Tratados * 100:.1f}%)")
 
+    # Calcular y mostrar costos
+    costos = calcular_costos(NUM_ENFERMERAS, NUM_DOCTORES, NUM_MAQUINAS)
+    print("\nCOSTOS DE OPERACIÓN (por día):")
+    print(f"Costo enfermeras: ${costos['enfermeras']:.2f}")
+    print(f"Costo doctores: ${costos['doctores']:.2f}")
+    print(f"Costo máquinas: ${costos['maquinas']:.2f}")
+    print(f"Costo total: ${costos['total']:.2f}")
+
+    if Pacientes_Tratados > 0:
+        costo_por_paciente = costos['total'] / Pacientes_Tratados
+        print(f"Costo promedio por paciente: ${costo_por_paciente:.2f}")
+
+
+def generar_graficas():
+    # Gráfica de tiempos promedio
+    fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+
+    # Gráfica de tiempos de espera
+    etapas = ['Triage', 'Doctor', 'Máquina', 'Total']
+    tiempos = [
+        statistics.mean(tiempos_espera_triage) if tiempos_espera_triage else 0,
+        statistics.mean(tiempos_espera_doctor) if tiempos_espera_doctor else 0,
+        statistics.mean(tiempos_espera_maquina) if tiempos_espera_maquina else 0,
+        statistics.mean(tiempos_totales) if tiempos_totales else 0
+    ]
+
+    axs[0].bar(etapas, tiempos)
+    axs[0].set_title('Tiempos promedio en cada etapa')
+    axs[0].set_ylabel('Minutos')
+
+    # Gráfica de severidades
+    severidades = list(severidades_pacientes.keys())
+    cantidades = [severidades_pacientes[s] for s in severidades]
+
+    axs[1].bar(severidades, cantidades)
+    axs[1].set_title('Distribución de pacientes por severidad')
+    axs[1].set_xlabel('Nivel de severidad')
+    axs[1].set_ylabel('Cantidad de pacientes')
+
+    plt.tight_layout()
+    plt.savefig('estadisticas_hospital.png')
+    plt.close()
+
+    print("\nGráficas generadas y guardadas como 'estadisticas_hospital.png'")
 
 
 def main():
+    # Establece la semilla
+    random.seed(42)
+
     env = simpy.Environment()
     hospital = Hospital(env, NUM_ENFERMERAS, NUM_DOCTORES, NUM_MAQUINAS)
-
     hospital.run()
-
     env.run(until=TIEMPO_SIMULACION)
 
+    # Mostrar estadísticas y generar gráficas
     imprimir_estadisticas()
+    generar_graficas()
 
 
 if __name__ == "__main__":
